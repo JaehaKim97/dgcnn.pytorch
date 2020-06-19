@@ -3,6 +3,7 @@
 This repo is a PyTorch implementation for **Dynamic Graph CNN for Learning on Point Clouds (DGCNN)**(https://arxiv.xilesou.top/pdf/1801.07829).
 
 Original code skeleton : [WangYueFt/dgcnn](https://github.com/WangYueFt/dgcnn/tree/master/pytorch)
+
 Revised version of AnTao : [AnTao97/dgcnn.pytorch](https://github.com/AnTao97/dgcnn.pytorch)
 
 I added visualization function, comments for understading, and fixed some errors during downlading ShapeNet dataset.
