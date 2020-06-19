@@ -38,7 +38,7 @@ python main_cls.py --exp_name=cls_2048 --num_points=2048 --k=40
 
 ### Run the evaluation script after training finished:
 
-You can visualize results with `--visualize` option. Note that whole evaluation process stops until you close 'Figure' window of matplot. Therfore, I recommend you to not use `--visualize` option when you want to get full evaluation results.
+You can visualize results with `--visualize` option. Note that whole evaluation process will stop until you close 'Figure' window of matplot. Therfore, I recommend you to not use `--visualize` option when you want to get full evaluation results.
 
 - 1024 points
 
