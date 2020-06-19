@@ -10,6 +10,11 @@ Modified by
 @Author: An Tao
 @Contact: ta19@mails.tsinghua.edu.cn
 @Time: 2020/3/9 9:32 PM
+
+Modified by 
+@Author: Jaeha Kim
+@Contact: hyjkim2@snu.ac.kr
+@Time: 2020/06/19 3:08 PM
 """
 
 
@@ -23,16 +28,29 @@ import torch.nn as nn
 import torch.nn.init as init
 import torch.nn.functional as F
 
-
+##########################################################
+# input 
+# x : current feature map
+# k : how many points for k nearest neighborhood
+# output
+# idx : index of feature map x, which belongs to k-NN of x
+##########################################################
 def knn(x, k):
     inner = -2*torch.matmul(x.transpose(2, 1), x)
     xx = torch.sum(x**2, dim=1, keepdim=True)
-    pairwise_distance = -xx - inner - xx.transpose(2, 1)
+    pairwise_distance = -xx - inner - xx.transpose(2, 1) # calculate euclidian distance
  
     idx = pairwise_distance.topk(k=k, dim=-1)[1]   # (batch_size, num_points, k)
     return idx
 
 
+##########################################################
+# input 
+# x : current feature map  
+# output
+# feature : grouping with k-NN, and concatenation with ed-
+#           ge function ((xj-xi), xi). i.e. centralization
+##########################################################
 def get_graph_feature(x, k=20, idx=None, dim9=False):
     batch_size = x.size(0)
     num_points = x.size(2)
@@ -129,7 +147,8 @@ class DGCNN_cls(nn.Module):
         self.dp2 = nn.Dropout(p=args.dropout)
         self.linear3 = nn.Linear(256, output_channels)
 
-    def forward(self, x):
+    # Total process of classfication model
+    def forward(self, x):                      
         batch_size = x.size(0)
         x = get_graph_feature(x, k=self.k)      # (batch_size, 3, num_points) -> (batch_size, 3*2, num_points, k)
         x = self.conv1(x)                       # (batch_size, 3*2, num_points, k) -> (batch_size, 64, num_points, k)

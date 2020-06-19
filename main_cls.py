@@ -10,6 +10,11 @@ Modified by
 @Author: An Tao
 @Contact: ta19@mails.tsinghua.edu.cn
 @Time: 2019/12/30 9:32 PM
+
+Modified by 
+@Author: Jaeha Kim
+@Contact: hyjkim2@snu.ac.kr
+@Time: 2020/06/19 3:08 PM
 """
 
 
@@ -27,7 +32,19 @@ import numpy as np
 from torch.utils.data import DataLoader
 from util import cal_loss, IOStream
 import sklearn.metrics as metrics
+import matplotlib.pyplot as plt
+from mpl_toolkits import mplot3d
+from mpl_toolkits.mplot3d import Axes3D
 
+# added by jaeha
+class_lists = ['airplane','bathtub','bed','bench','bookshelf',
+               'bottle','bowl','car','chair','cone',
+               'cup','curtain','desk','door','dresser',
+               'flower_pot','glass_box','guitar','keyboard','lamp',
+               'laptop','mantel','monitor','night_stand','person',
+               'piano','plant','radio','range_hood','sink',
+               'sofa','stairs','stool','table','tent',
+               'toilet','tv_stand','vase','wardrobe','xbox']
 
 def _init_():
     if not os.path.exists('checkpoints'):
@@ -174,7 +191,6 @@ def test(args, io):
     test_true = []
     test_pred = []
     for data, label in test_loader:
-
         data, label = data.to(device), label.to(device).squeeze()
         data = data.permute(0, 2, 1)
         batch_size = data.size()[0]
@@ -182,6 +198,13 @@ def test(args, io):
         preds = logits.max(dim=1)[1]
         test_true.append(label.cpu().numpy())
         test_pred.append(preds.detach().cpu().numpy())
+        # visualize - added by jaeha
+        if args.visualize:
+            xyz = data[0].cpu()
+            ax = plt.axes(projection='3d')
+            ax.scatter(xyz[0,:], xyz[1,:], xyz[2,:], s=1, color='blue')
+            plt.title('True: '+class_lists[label[0]]+' ,  Pred: '+class_lists[preds[0]])
+            plt.show()
     test_true = np.concatenate(test_true)
     test_pred = np.concatenate(test_pred)
     test_acc = metrics.accuracy_score(test_true, test_pred)
@@ -231,6 +254,9 @@ if __name__ == "__main__":
                         help='Num of nearest neighbors to use')
     parser.add_argument('--model_path', type=str, default='', metavar='N',
                         help='Pretrained model path')
+    # added by jaeha
+    parser.add_argument('--visualize', action='store_true',
+                        help='show actual plot of point cloud')
     args = parser.parse_args()
 
     _init_()

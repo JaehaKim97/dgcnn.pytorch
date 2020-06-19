@@ -5,8 +5,12 @@
 @Contact: ta19@mails.tsinghua.edu.cn
 @File: main_partseg.py
 @Time: 2019/12/31 11:17 AM
-"""
 
+Modified by 
+@Author: Jaeha Kim
+@Contact: hyjkim2@snu.ac.kr
+@Time: 2020/06/19 3:08 PM
+"""
 
 from __future__ import print_function
 import os
@@ -22,9 +26,19 @@ import numpy as np
 from torch.utils.data import DataLoader
 from util import cal_loss, IOStream
 import sklearn.metrics as metrics
+import matplotlib.pyplot as plt
+from mpl_toolkits import mplot3d
 
 seg_num = [4, 2, 2, 4, 4, 3, 3, 2, 4, 2, 6, 2, 3, 3, 3, 3]
 index_start = [0, 4, 6, 8, 12, 16, 19, 22, 24, 28, 30, 36, 38, 41, 44, 47]
+
+# added by jaeha
+class_lists = [
+    'Airplane', 'Bag', 'Cap', 'Car', 'Chair',
+    'Earphone', 'Guitar', 'Knife', 'Lamp', 'Laptop',
+    'Motorbike', 'Mug', 'Pistol', 'Rocket', 'Skateboard',
+    'Table'
+]
 
 def _init_():
     if not os.path.exists('checkpoints'):
@@ -256,6 +270,11 @@ def test(args, io):
         test_true_seg.append(seg_np)
         test_pred_seg.append(pred_np)
         test_label_seg.append(label.reshape(-1))
+        # visualize -  added by jaeha
+        if args.visualize:
+            visualize(data, pred_np, label, 0)
+            visualize(data, seg_np, label, 0)
+
     test_true_cls = np.concatenate(test_true_cls)
     test_pred_cls = np.concatenate(test_pred_cls)
     test_acc = metrics.accuracy_score(test_true_cls, test_pred_cls)
@@ -269,6 +288,34 @@ def test(args, io):
                                                                              np.mean(test_ious))
     io.cprint(outstr)
 
+##########################################################
+# input 
+# data : input 3d points
+# label : prediced(or ground-truth) label
+# class_label : classification label
+# idx : index of batch to visualize
+##########################################################
+def visualize(data, label, class_label, idx):
+    ax = plt.axes(projection='3d')
+    data = np.array(data.cpu())
+
+    data = data[idx]
+    label = label[idx]
+
+    label_lists = []
+    color_lists = ['blue', 'red', 'green', 'yellow', 'black', 'white', 'cyan', 'magneta']
+
+    for i in range(len(label)):
+        if not (label[i] in label_lists):
+            label_lists.append(label[i])
+    
+    for j in range(len(label_lists)):
+        m_data = data * ( label == label_lists[j])
+        ax.scatter(m_data[0]*(m_data[0] != 0), m_data[1]*(m_data[1] != 0),
+                   m_data[2]*(m_data[2] != 0), s=1, color=color_lists[j])
+    
+    plt.title(class_lists[class_label[idx]])
+    plt.show()
 
 if __name__ == "__main__":
     # Training settings
@@ -315,6 +362,9 @@ if __name__ == "__main__":
                         help='Num of nearest neighbors to use')
     parser.add_argument('--model_path', type=str, default='', metavar='N',
                         help='Pretrained model path')
+    # added by jaeha
+    parser.add_argument('--visualize', action='store_true',
+                        help='show actual plot of point cloud')
     args = parser.parse_args()
 
     _init_()
