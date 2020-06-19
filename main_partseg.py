@@ -273,7 +273,7 @@ def test(args, io):
         # visualize -  added by jaeha
         if args.visualize:
             visualize(data, pred_np, label, 0)
-            visualize(data, seg_np, label, 0)
+            visualize(data, seg_np, label, 0, GT=True)
 
     test_true_cls = np.concatenate(test_true_cls)
     test_pred_cls = np.concatenate(test_pred_cls)
@@ -295,7 +295,7 @@ def test(args, io):
 # class_label : classification label
 # idx : index of batch to visualize
 ##########################################################
-def visualize(data, label, class_label, idx):
+def visualize(data, label, class_label, idx, GT=False):
     ax = plt.axes(projection='3d')
     data = np.array(data.cpu())
 
@@ -314,7 +314,10 @@ def visualize(data, label, class_label, idx):
         ax.scatter(m_data[0]*(m_data[0] != 0), m_data[1]*(m_data[1] != 0),
                    m_data[2]*(m_data[2] != 0), s=1, color=color_lists[j])
     
-    plt.title(class_lists[class_label[idx]])
+    if GT:
+        plt.title(class_lists[class_label[idx]]+' (True)')
+    else:
+        plt.title(class_lists[class_label[idx]]+' (Pred)')
     plt.show()
 
 if __name__ == "__main__":
